@@ -36,7 +36,13 @@ connection.once('open', () => {
 
 const usersRouter = require('./routes/user');
 const userAuth = require('./routes/auth');
+const userPost = require('./routes/post');
+const userLike = require('./routes/like');
+const userComment = require('./routes/comment');
 
 
 app.use('/users',usersRouter);
 app.use('/auth',userAuth);
+app.use('/post',userPost);
+app.use('/like',userLike);
+app.use('/comment',userComment);

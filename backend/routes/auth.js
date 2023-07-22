@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const User = require('../models/user.model');
+const Login = require('../models/user.model');
 
 // POST /login
 router.post('/login', async (req, res) => {
@@ -8,13 +8,13 @@ router.post('/login', async (req, res) => {
 
     try {
         // Find the user by email
-        const user = await User.findOne({ email });
+        const user = await Login.findOne({ email });
 
         if (!user || user.password !== password) {
             return res.status(401).json({ error: 'Invalid email or password' });
         }
 
-        // User authenticated successfully, create a session or token
+        // Login authenticated successfully, create a session or token
         // and send a success response
         res.json({
             message: 'Login successful',
