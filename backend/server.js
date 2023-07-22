@@ -21,7 +21,22 @@ mongoose.connect(uri, {
     useUnifiedTopology: true,
 });
 
+app.listen(port, () => {
+    console.log(`Server is running on port: ${port}`);
+});
+
 const connection = mongoose.connection;
 connection.once('open', () => {
     console.log('MongoDB database connection established successfully');
 });
+
+/*
+* Routing
+*/
+
+const usersRouter = require('./routes/user');
+const userAuth = require('./routes/auth');
+
+
+app.use('/users',usersRouter);
+app.use('/auth',userAuth);
