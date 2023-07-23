@@ -23,18 +23,15 @@ export default class RegistrationUser extends Component {
     constructor(props) {
         super(props);
 
-        this.onchangeName = this.onchangeName.bind(this)
         this.onchangeEmail = this.onchangeEmail.bind(this)
         this.onchangePassword = this.onchangePassword.bind(this)
-        this.onchangeReTypepassword = this.onchangeReTypepassword.bind(this)
         this.onSubmit = this.onSubmit.bind(this)
 
 
         this.state = {
-            name: '',
+
             email: '',
             password: '',
-            reTypepassword: '',
             errorTimeout: null,
             success: '',
             successTimeout: null,
@@ -80,12 +77,6 @@ export default class RegistrationUser extends Component {
     };
 
 
-    onchangeName(e) {
-        this.setState({
-            name: e.target.value
-        })
-    }
-
     onchangeEmail(e) {
         this.setState({
             email: e.target.value
@@ -98,29 +89,23 @@ export default class RegistrationUser extends Component {
         })
     }
 
-    onchangeReTypepassword(e) {
-        this.setState({
-            reTypepassword: e.target.value
-        })
-    }
 
     onSubmit(e) {
         e.preventDefault();
 
-        const registration = {
-            name: this.state.name,
+        const login = {
             email: this.state.email,
             password: this.state.password,
-            reTypepassword: this.state.reTypepassword,
+
         }
-        console.log(registration);
+        console.log(login);
 
         axios
-            .post(`${backendUrl}/users/add`, registration)
+            .post(`${backendUrl}/auth/login`, login)
             .then((res) => {
                 console.log(res.data);
-                this.setSuccessWithTimeout('User added successfully');
-                window.location = '/';
+                this.setSuccessWithTimeout('Login successfully');
+                // window.location = '/';
             })
             .catch((error) => {
                 console.error(error);
@@ -143,13 +128,7 @@ export default class RegistrationUser extends Component {
 
                                 <form onSubmit={this.onSubmit}>
 
-                                    <p className="text-center h1 fw-bold mb-5 mx-1 mx-md-4 mt-4">Sign up</p>
-
-                                    <div className="d-flex flex-row align-items-center mb-4 ">
-                                        <MDBIcon fas icon="user me-3" size='lg'/>
-                                        <MDBInput label='Your Name' id='name' value={this.state.name}
-                                                  onChange={this.onchangeName} type='text' className='w-100'/>
-                                    </div>
+                                    <p className="text-center h1 fw-bold mb-5 mx-1 mx-md-4 mt-4">Login</p>
 
                                     <div className="d-flex flex-row align-items-center mb-4">
                                         <MDBIcon fas icon="envelope me-3" size='lg'/>
@@ -163,13 +142,6 @@ export default class RegistrationUser extends Component {
                                                   onChange={this.onchangePassword} type='password'/>
                                     </div>
 
-                                    <div className="d-flex flex-row align-items-center mb-4">
-                                        <MDBIcon fas icon="key me-3" size='lg'/>
-                                        <MDBInput label='Repeat your password' id='reTypepassword'
-                                                  value={this.state.reTypepassword}
-                                                  onChange={this.onchangeReTypepassword} type='password'/>
-                                    </div>
-
                                     {/* Display the error message if there is one */}
                                     {this.state.error && this.state.error.length > 0 && (
                                         <div className='alert alert-danger' role='alert'>
@@ -180,16 +152,18 @@ export default class RegistrationUser extends Component {
                                     )}
 
                                     <div className="d-flex flex-row align-items-center mb-4">
-                                        <input type="submit" style={{marginLeft: '18px'}} value="Register"
+                                        <input type="submit" style={{marginLeft: '18px'}} value="Login"
                                                className="btn btn-primary"/>
-                                        <a href="/login" style={{marginLeft: '18px'}}
-                                           className="btn btn-secondary">Login</a>
+                                        <a href="/registration" style={{marginLeft: '18px'}}
+                                           className="btn btn-secondary">Register</a>
                                     </div>
-                                    <p style={{marginLeft: '18px', color: 'blue', cursor: 'pointer'}}> Already Have an
-                                        Account? Click <a href="/login"
-                                                          style={{color: 'blue', textDecoration: 'underline'}}>Login</a>
+                                    <p style={{marginLeft: '18px', color: 'blue', cursor: 'pointer'}}> Want to Create
+                                        Profile? Click <a href="/registration"
+                                                          style={{
+                                                              color: 'blue',
+                                                              textDecoration: 'underline'
+                                                          }}>Register</a>
                                     </p>
-
 
                                     {this.state.success && (
                                         <div className='alert alert-success' role='alert'>
