@@ -2,10 +2,11 @@ const express = require('express');
 const cors = require('cors');
 const session = require('express-session');
 const mongoose = require('mongoose');
-const cookieParser = require("cookie-parser");
 const crypto = require("crypto");
 const sessions = require("express-session");
 const Session = require('./models/session.model');
+const cookieParser = require("cookie-parser");
+const Cookies = require('js-cookie');
 
 require('dotenv').config();
 process.env.TZ = 'Asia/Dhaka';
@@ -14,7 +15,10 @@ process.env.TZ = 'Asia/Dhaka';
 const app = express();
 const port = process.env.PORT || 5000;
 
-app.use(cors());
+app.use(cors({
+    origin: 'http://localhost:3000',
+    credentials: true,
+}));
 app.use(express.json());
 
 /*
@@ -44,19 +48,28 @@ connection.once('open', () => {
 app.use(cookieParser());
 
 const secretKey = crypto.randomBytes(32).toString('hex');
-
 app.use(sessions({
     secret: secretKey,
     saveUninitialized: true,
-    cookie: {maxAge: 600000},
+    cookie: {maxAge: 600000, sameSite: 'strict'},
     resave: false
 }));
 
 const isAuthenticated = async (req, res, next) => {
+
+    console.log(Cookies.get("sessionID"));
+
     try {
-        const session = await Session.findOne({sessionId: req.sessionID});
+        const sessionID = 'MeinZ_MY0tivymMtwv6NzIBTZ0d2GWgb';
+        if (!sessionID) {
+            return res.status(401).json({error: 'Authentication required[1]. SessionID: ' + sessionID});
+        }
+
+        console.log('Get from sessionStorage ' + sessionID);
+
+        const session = await Session.findOne({sessionId: sessionID});
         if (session) {
-            const userCheckSession = await Session.findOne({sessionId: req.sessionID});
+            const userCheckSession = await Session.findOne({sessionId: sessionID});
             if (userCheckSession) {
                 const expirationDate = new Date(userCheckSession.expiresAt);
                 const currentTime = new Date();
@@ -66,13 +79,13 @@ const isAuthenticated = async (req, res, next) => {
                 if (currentTime < expirationDate) {
                     next();
                 } else {
-                    await Session.deleteOne({sessionId: req.sessionID});
-                    res.status(401).json({error: 'Authentication required'});
+                    await Session.deleteOne({sessionId: sessionID});
+                    res.status(401).json({error: 'Authentication required[2]'});
                 }
             }
 
         } else {
-            res.status(401).json({error: 'Authentication required'});
+            res.status(401).json({error: 'Authentication required[3]'});
         }
     } catch (err) {
         res.status(500).json({error: 'Internal server error'});

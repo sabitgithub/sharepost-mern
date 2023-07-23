@@ -42,9 +42,10 @@ router.post('/login', async (req, res) => {
         const newSession = new Session({userId: user._id, sessionId: req.sessionID, expiresAt: expireTime});
         await newSession.save();
 
-        console.log('session:' + req.sessionID);
+        console.log('session from login:' + req.sessionID);
         res.json({
             message: 'Login successful',
+            sessionID: req.sessionID,
         });
     } catch (err) {
         res.status(500).json({error: 'An error occurred while processing your request'});

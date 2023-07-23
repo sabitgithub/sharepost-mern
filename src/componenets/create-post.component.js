@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {Link} from 'react-router-dom';
 import axios from "axios";
-import Cookies from 'js-cookie';
+
 import {
     MDBBtn,
     MDBContainer,
@@ -18,20 +18,21 @@ import {
 
 const backendUrl = 'http://localhost:5000';
 
-export default class LoginUser extends Component {
+export default class CreatePost extends Component {
 
     constructor(props) {
         super(props);
 
-        this.onchangeEmail = this.onchangeEmail.bind(this)
-        this.onchangePassword = this.onchangePassword.bind(this)
+        this.onchangeTitle = this.onchangeTitle.bind(this)
+        this.onchangeContent = this.onchangeContent.bind(this)
+        this.onchangeImage = this.onchangeImage.bind(this)
         this.onSubmit = this.onSubmit.bind(this)
 
 
         this.state = {
-
-            email: '',
-            password: '',
+            onchangeTitle: '',
+            onchangeContent: '',
+            onchangeImage: '',
             errorTimeout: null,
             success: '',
             successTimeout: null,
@@ -77,6 +78,12 @@ export default class LoginUser extends Component {
     };
 
 
+    onchangeName(e) {
+        this.setState({
+            name: e.target.value
+        })
+    }
+
     onchangeEmail(e) {
         this.setState({
             email: e.target.value
@@ -89,33 +96,34 @@ export default class LoginUser extends Component {
         })
     }
 
+    onchangeReTypepassword(e) {
+        this.setState({
+            reTypepassword: e.target.value
+        })
+    }
 
     onSubmit(e) {
         e.preventDefault();
 
-        const login = {
+        const registration = {
+            name: this.state.name,
             email: this.state.email,
             password: this.state.password,
-
+            reTypepassword: this.state.reTypepassword,
         }
-        console.log(login);
+        console.log(registration);
 
         axios
-            .post(`${backendUrl}/auth/login`, login,{ withCredentials: true })
+            .post(`${backendUrl}/users/add`, registration)
             .then((res) => {
                 console.log(res.data);
-                this.setSuccessWithTimeout('Login successfully');
-                const sessionID = res.data.sessionID;
-                Cookies.set('sessionID', sessionID, { expires: 10 / (60 * 24) });
+                this.setSuccessWithTimeout('User added successfully');
                 window.location = '/';
             })
             .catch((error) => {
                 console.error(error);
-                const errorMessage = error.response && error.response.data && error.response.data.error
-                    ? error.response.data.error
-                    : 'An error occurred while processing your request';
-
-                this.setErrorWithTimeout(errorMessage);
+                // Set the error message in the state
+                this.setErrorWithTimeout(error.response.data.error);
             });
 
 
@@ -133,7 +141,13 @@ export default class LoginUser extends Component {
 
                                 <form onSubmit={this.onSubmit}>
 
-                                    <p className="text-center h1 fw-bold mb-5 mx-1 mx-md-4 mt-4">Login</p>
+                                    <p className="text-center h1 fw-bold mb-5 mx-1 mx-md-4 mt-4">Sign up</p>
+
+                                    <div className="d-flex flex-row align-items-center mb-4 ">
+                                        <MDBIcon fas icon="user me-3" size='lg'/>
+                                        <MDBInput label='Your Name' id='name' value={this.state.name}
+                                                  onChange={this.onchangeName} type='text' className='w-100'/>
+                                    </div>
 
                                     <div className="d-flex flex-row align-items-center mb-4">
                                         <MDBIcon fas icon="envelope me-3" size='lg'/>
@@ -147,6 +161,13 @@ export default class LoginUser extends Component {
                                                   onChange={this.onchangePassword} type='password'/>
                                     </div>
 
+                                    <div className="d-flex flex-row align-items-center mb-4">
+                                        <MDBIcon fas icon="key me-3" size='lg'/>
+                                        <MDBInput label='Repeat your password' id='reTypepassword'
+                                                  value={this.state.reTypepassword}
+                                                  onChange={this.onchangeReTypepassword} type='password'/>
+                                    </div>
+
                                     {/* Display the error message if there is one */}
                                     {this.state.error && this.state.error.length > 0 && (
                                         <div className='alert alert-danger' role='alert'>
@@ -157,18 +178,16 @@ export default class LoginUser extends Component {
                                     )}
 
                                     <div className="d-flex flex-row align-items-center mb-4">
-                                        <input type="submit" style={{marginLeft: '18px'}} value="Login"
+                                        <input type="submit" style={{marginLeft: '18px'}} value="Register"
                                                className="btn btn-primary"/>
-                                        <a href="/registration" style={{marginLeft: '18px'}}
-                                           className="btn btn-secondary">Register</a>
+                                        <a href="/login" style={{marginLeft: '18px'}}
+                                           className="btn btn-secondary">Login</a>
                                     </div>
-                                    <p style={{marginLeft: '18px', color: 'blue', cursor: 'pointer'}}> Want to Create
-                                        Profile? Click <a href="/registration"
-                                                          style={{
-                                                              color: 'blue',
-                                                              textDecoration: 'underline'
-                                                          }}>Register</a>
+                                    <p style={{marginLeft: '18px', color: 'blue', cursor: 'pointer'}}> Already Have an
+                                        Account? Click <a href="/login"
+                                                          style={{color: 'blue', textDecoration: 'underline'}}>Login</a>
                                     </p>
+
 
                                     {this.state.success && (
                                         <div className='alert alert-success' role='alert'>
