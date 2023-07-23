@@ -1,4 +1,5 @@
 const router = require('express').Router();
+const bcrypt = require('bcrypt');
 const User = require('../models/user.model');
 
 function isStrongPassword(password) {
@@ -27,21 +28,30 @@ router.route('/').get((req, res) => {
 router.route('/add').post(async (req, res) => {
     const name = req.body.name;
     const email = req.body.email;
-    const password = req.body.password;
+    const input_password = req.body.password;
 
-    if (password == 'MyPassw0rd$') {
+    // Check if the email is already registered
+    const existingUser = await User.findOne({email});
+    if (existingUser) {
+        return res.status(409).json({error: 'Email already registered'});
+    }
+
+    if (input_password == 'MyPassw0rd$') {
         return res.status(400).json('Password is same as example');
     }
 
-    if (!isStrongPassword(password)) {
+    if (!isStrongPassword(input_password)) {
         return res.status(400).json('Password does not meet the strength requirements.');
     }
+
+    // Hash the password
+    const password = await bcrypt.hash(input_password, 10);
 
     try {
         const newUser = new User({
             name,
             email,
-            password,
+            password
         });
 
         // Attempt to save the new user
