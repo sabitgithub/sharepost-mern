@@ -11,7 +11,6 @@ require('dotenv').config();
 process.env.TZ = 'Asia/Dhaka';
 
 
-
 const app = express();
 const port = process.env.PORT || 5000;
 
@@ -55,15 +54,28 @@ app.use(sessions({
 
 const isAuthenticated = async (req, res, next) => {
     try {
-        const session = await Session.findOne({ sessionId: req.sessionID });
+        const session = await Session.findOne({sessionId: req.sessionID});
         if (session) {
-            // User is authenticated, proceed to the next middleware or route handler
-            next();
+            const userCheckSession = await Session.findOne({sessionId: req.sessionID});
+            if (userCheckSession) {
+                const expirationDate = new Date(userCheckSession.expiresAt);
+                const currentTime = new Date();
+
+                console.log('current date: ' + currentTime);
+                console.log('exp date: ' + expirationDate);
+                if (currentTime < expirationDate) {
+                    next();
+                } else {
+                    await Session.deleteOne({sessionId: req.sessionID});
+                    res.status(401).json({error: 'Authentication required'});
+                }
+            }
+
         } else {
-            res.status(401).json({ error: 'Authentication required' });
+            res.status(401).json({error: 'Authentication required'});
         }
     } catch (err) {
-        res.status(500).json({ error: 'Internal server error' });
+        res.status(500).json({error: 'Internal server error'});
     }
 };
 
@@ -77,14 +89,15 @@ const userAuth = require('./routes/auth');
 const userPost = require('./routes/post');
 const userLike = require('./routes/like');
 const userComment = require('./routes/comment');
+const userProfile = require('./routes/userProfile');
 
 
-
-app.use('/users',usersRouter); //This is registration user no authentication required
-app.use('/auth',userAuth); //This is login user no authentication required
+app.use('/users', usersRouter); //This is registration user no authentication required
+app.use('/auth', userAuth); //This is login user no authentication required
 
 
 // Routes that require authentication (use the isAuthenticated middleware)
-app.use('/post',isAuthenticated,userPost);
-app.use('/like',isAuthenticated,userLike);
-app.use('/comment',isAuthenticated,userComment);
+app.use('/profile', isAuthenticated, userProfile);
+app.use('/post', isAuthenticated, userPost);
+app.use('/like', isAuthenticated, userLike);
+app.use('/comment', isAuthenticated, userComment);
