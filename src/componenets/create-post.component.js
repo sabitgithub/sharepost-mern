@@ -1,6 +1,6 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import axios from "axios";
-import {MDBContainer, MDBCard, MDBCardBody, MDBInput} from 'mdb-react-ui-kit';
+import { MDBContainer, MDBCard, MDBCardBody, MDBInput } from 'mdb-react-ui-kit';
 import Cookies from "js-cookie";
 
 const backendUrl = 'http://localhost:5000';
@@ -10,8 +10,10 @@ export default class CreateNewPost extends Component {
         super(props);
 
         this.state = {
-            title: "", // New field for the post title
+            title: "",
             newPost: "",
+            image: null,
+            imagePreview: null,
             showSuccessAlert: false,
         };
     }
@@ -30,25 +32,42 @@ export default class CreateNewPost extends Component {
         });
     };
 
+    onChangeImage = (event) => {
+        const file = event.target.files[0];
+
+        if (file) {
+            this.setState({
+                image: file,
+                imagePreview: URL.createObjectURL(file),
+            });
+        }
+    };
+
     // Handle the submission of the new post
     handleNewPostSubmit = () => {
-        const {title, newPost} = this.state;
-        axios.post(`${backendUrl}/post/add`, {
-            title: title, // Pass the title to the backend
-            content: newPost,
-            userid: Cookies.get('sessionUserID'),
-        })
+        const { title, newPost, image } = this.state;
+        const formData = new FormData();
+        formData.append("title", title);
+        formData.append("content", newPost);
+        formData.append("userid", Cookies.get('sessionUserID'));
+        formData.append("image", image);
+
+        console.log(formData);
+
+        axios.post(`${backendUrl}/post/add`, formData)
             .then((response) => {
                 if (response.status === 200) {
-                    // Clear the input fields after successful submission
                     this.setState({
                         title: "",
                         newPost: "",
+                        image: null,
+                        imagePreview: null,
                         showSuccessAlert: true,
                     });
                     setTimeout(() => {
-                        this.setState({showSuccessAlert: false});
+                        this.setState({ showSuccessAlert: false });
                     }, 3000);
+                    window.location = '/';
                 }
             })
             .catch((error) => {
@@ -57,11 +76,10 @@ export default class CreateNewPost extends Component {
     };
 
     render() {
-        const {title, newPost, showSuccessAlert} = this.state;
+        const { title, newPost, imagePreview, showSuccessAlert } = this.state;
         return (
             <MDBContainer fluid>
-                <MDBCard className='text-black mb-3' alignment='center'
-                         style={{maxWidth: '800px', maxHeight: '1200px', margin: '0 auto', padding: '16px'}}>
+                <MDBCard className='text-black mb-3' alignment='center' style={{ maxWidth: '800px', maxHeight: '1200px', margin: '0 auto', padding: '16px' }}>
                     <MDBCardBody>
                         <MDBInput
                             type='text'
@@ -75,8 +93,19 @@ export default class CreateNewPost extends Component {
                             placeholder='Write your thoughts...'
                             value={newPost}
                             onChange={this.onChangeNewPost}
-                            style={{height: '236px'}}
+                            style={{ height: '236px' }}
                         ></textarea>
+                        <div className="form-group mt-3">
+                            <label htmlFor="image">Upload Image:</label>
+                            <input
+                                type="file"
+                                id="image"
+                                className="form-control"
+                                accept="image/*"
+                                onChange={this.onChangeImage}
+                            />
+                        </div>
+                        {imagePreview && <img src={imagePreview} alt="Image Preview" style={{ maxWidth: '100%', height: 'auto', marginTop: '10px' }} />}
                         <button className='btn btn-primary mt-3' onClick={this.handleNewPostSubmit}>
                             Submit Post
                         </button>

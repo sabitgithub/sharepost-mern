@@ -119,8 +119,14 @@ const Post = props => {
     return (
         <MDBCard className='text-black mb-3' alignment='center' style={{'marginTop': '40px'}}>
             {props.post.image &&
-                <MDBCardImage src={props.post.image} alt={props.post.title} width={'400px'} height={'300px'}
-                              position="top"/>}
+                <MDBCardImage src={backendUrl + '/uploads/' + props.post.image} alt={props.post.title} style={{
+                    'width': '800px',
+                    'height': '200px',
+                    'objectFit': 'contain', // Updated to 'objectFit'
+                    'objectPosition': 'center', // Updated to 'objectPosition'
+                    'alignContent': 'center'
+                }} position="center"/>}
+
             <MDBCardBody>
                 <MDBCardTitle>{props.post.title}</MDBCardTitle>
                 <div className='d-flex justify-content-between'>
