@@ -116,7 +116,7 @@ const Post = props => {
                 }
             })
             .catch((error) => {
-                console.error(error);
+                window.location = '/login?error='+error.response.data.error;
             });
     };
 
@@ -138,7 +138,7 @@ const Post = props => {
                 window.location.reload();
             })
             .catch((error) => {
-                console.error(error);
+                window.location = '/login?error='+error.response.data.error;
             });
     };
 
@@ -225,7 +225,8 @@ export default class PostList extends Component {
                 this.setState({posts: response.data});
             })
             .catch(error => {
-                console.log(error);
+                console.log('Server Response: ' + error.response.data.error);
+                window.location = '/login?error='+error.response.data.error;
             });
     }
 

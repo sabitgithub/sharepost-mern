@@ -60,11 +60,11 @@ const isAuthenticated = async (req, res, next) => {
         console.log('Get from header sessionUserID:', sessionUserID);
 
         if (!sessionID) {
-            return res.status(401).json({error: 'Authentication required[1]. SessionID: ' + sessionID});
+            return res.status(401).json({error: 'Unauthorized'});
         }
 
         const userCheckSession = await Session.findOne({sessionId: sessionID});
-        console.log('User check: '+sessionID);
+        console.log('User check: ' + sessionID);
         if (userCheckSession) {
             const expirationDate = new Date(userCheckSession.expiresAt);
             const currentTime = new Date();
@@ -73,8 +73,10 @@ const isAuthenticated = async (req, res, next) => {
                 next();
             } else {
                 await Session.deleteOne({sessionId: sessionID});
-                res.status(401).json({error: 'Authentication required[2]'});
+                res.status(401).json({error: 'Unauthorized'});
             }
+        } else {
+            res.status(401).json({error: 'Unauthorized'});
         }
     } catch (err) {
         res.status(500).json({error: 'Internal server error'});

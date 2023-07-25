@@ -64,4 +64,33 @@ router.post('/logout', async (req, res) => {
     }
 });
 
+router.post('/validate-auth', async (req, res, next) => {
+    try {
+        const sessionID = req.header('sessionID');
+
+        if (!sessionID) {
+            return res.status(404).json({error: 'No Session found'});
+        }
+
+        const userCheckSession = await SessionModel.findOne({sessionId: sessionID});
+        if (userCheckSession) {
+            const expirationDate = new Date(userCheckSession.expiresAt);
+            const currentTime = new Date();
+
+            console.log('current date: ' + currentTime);
+            console.log('exp date: ' + expirationDate);
+            if (currentTime < expirationDate) {
+                next();
+            } else {
+                res.status(401).json({error: 'Unauthorized'});
+            }
+        } else {
+            res.status(401).json({error: 'No Session'});
+        }
+    } catch (err) {
+        res.status(500).json({error: 'Internal server error' + err});
+    }
+});
+
+
 module.exports = router;

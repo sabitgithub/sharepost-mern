@@ -53,7 +53,6 @@ export default class CreateNewPost extends Component {
         formData.append("userid", Cookies.get('sessionUserID'));
         formData.append("image", image);
 
-        console.log(formData);
 
         axios.post(`${backendUrl}/post/add`, formData, {
             headers: {
@@ -78,11 +77,18 @@ export default class CreateNewPost extends Component {
             })
             .catch((error) => {
                 console.error(error);
+                this.setState({showErrorAlert: true});
+                setTimeout(() => {
+                    this.setState({showErrorAlert: false});
+                }, 3000);
+                setTimeout(() => {
+                    window.location = '/login';
+                }, 3000);
             });
     };
 
     render() {
-        const {title, newPost, imagePreview, showSuccessAlert} = this.state;
+        const {title, newPost, imagePreview, showSuccessAlert, showErrorAlert} = this.state;
         return (
             <>
                 <Navbar/>
@@ -123,6 +129,11 @@ export default class CreateNewPost extends Component {
                             {showSuccessAlert && (
                                 <div className="alert alert-success mt-3" role="alert">
                                     Post submitted successfully!
+                                </div>
+                            )}
+                            {showErrorAlert && (
+                                <div className="alert alert-danger mt-3" role="alert">
+                                    You are not authorized to post. Please login to continue.
                                 </div>
                             )}
                         </MDBCardBody>

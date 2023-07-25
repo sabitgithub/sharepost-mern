@@ -28,6 +28,14 @@ router.route('/add').post(upload.single('image'), async (req, res) => {
     const image = req.file ? req.file.filename : '';
     const userid = sessionUserID;
 
+    if (!content || content.length === 0) {
+        return res.status(404).json({error: 'No Post found'});
+    }
+
+    if (!title || title.length === 0) {
+        return res.status(404).json({error: 'No title found'});
+    }
+
     try {
         const newPost = new Post({
             title,
