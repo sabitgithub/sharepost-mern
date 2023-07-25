@@ -35,11 +35,11 @@ export default class Navbar extends Component {
                                 New Post
                             </Link>
                         </li>
-                        <li className="navbar-item">
-                            <Link to="/profile" className="nav-link">
-                                Profile
-                            </Link>
-                        </li>
+                        {/*<li className="navbar-item">*/}
+                        {/*    <Link to="/profile" className="nav-link">*/}
+                        {/*        Profile*/}
+                        {/*    </Link>*/}
+                        {/*</li>*/}
                         <li className="navbar-item">
                             {/* Use the handleLogout method when the "Logout" link is clicked */}
                             <Link to="#" className="nav-link" onClick={this.handleLogout}>

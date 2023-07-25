@@ -4,7 +4,6 @@ import {BrowserRouter as Router, Routes, Route} from "react-router-dom"; // Impo
 
 import Registration from "./componenets/registration.component";
 import Login from "./componenets/login.component";
-import Navbar from "./componenets/navbar.component";
 import Post from "./componenets/post-list.component";
 import Logout from "./componenets/logout.component";
 import CreatePost from "./componenets/create-post.component";
@@ -12,7 +11,6 @@ import CreatePost from "./componenets/create-post.component";
 function App() {
     return (
         <Router>
-            <Navbar/>
             <br/>
             <Routes>
                 <Route path="/" element={<Post/>}/>

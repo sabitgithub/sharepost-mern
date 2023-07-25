@@ -2,6 +2,7 @@ import React, {Component, useEffect, useState} from 'react';
 import axios from 'axios';
 import {MDBCard, MDBCardBody, MDBCardTitle, MDBCardText, MDBBtn, MDBCardImage, MDBCardFooter} from 'mdb-react-ui-kit';
 import Cookies from 'js-cookie';
+import Navbar from './navbar.component';
 
 const backendUrl = 'http://localhost:5000';
 
@@ -122,8 +123,8 @@ const Post = props => {
                 <MDBCardImage src={backendUrl + '/uploads/' + props.post.image} alt={props.post.title} style={{
                     'width': '800px',
                     'height': '200px',
-                    'objectFit': 'contain', // Updated to 'objectFit'
-                    'objectPosition': 'center', // Updated to 'objectPosition'
+                    'objectFit': 'contain',
+                    'objectPosition': 'center',
                     'alignContent': 'center'
                 }} position="center"/>}
 
@@ -207,11 +208,14 @@ export default class PostList extends Component {
 
     render() {
         return (
+            <>
+            <Navbar />
             <div style={{maxWidth: '800px', margin: '0 auto', padding: '16px'}}>
                 <div>
                     {this.postList()}
                 </div>
             </div>
+            </>
         );
     }
 }
