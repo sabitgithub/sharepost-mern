@@ -6,12 +6,17 @@ const backendUrl = 'http://localhost:5000';
 
 export default class Navbar extends Component {
     handleLogout = () => {
+
         axios
-            .post(`${backendUrl}/auth/logout`)
+            .post(`${backendUrl}/auth/logout`, {}, {
+                headers: {
+                    'sessionID': sessionStorage.getItem('sessionID'),
+                    'sessionUserID': sessionStorage.getItem('sessionUserID'),
+                },
+            })
             .then((res) => {
-                sessionStorage.removeItem('sessionID');
                 sessionStorage.clear();
-                window.location = '/login'; // Redirect to the login page after logout
+                window.location = '/login';
             })
             .catch((error) => {
                 console.error(error);
@@ -30,7 +35,8 @@ export default class Navbar extends Component {
                             <Link to="/" className="nav-link">
                                 NewsFeed
                             </Link>
-                        </li><li className="navbar-item">
+                        </li>
+                        <li className="navbar-item">
                             <Link to="CreatePost" className="nav-link">
                                 New Post
                             </Link>

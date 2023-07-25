@@ -12,7 +12,9 @@ router.route('/').get((req, res) => {
 });
 
 router.route('/add').post(async (req, res) => {
-        const userid = req.body.userid;
+        const sessionUserID = req.header('sessionUserID');
+
+        const userid = sessionUserID;
         const postid = req.body.postid;
 
         if (!userid) {
@@ -50,7 +52,8 @@ router.route('/add').post(async (req, res) => {
 );
 
 router.route('/user-like').post(async (req, res) => {
-    const userid = req.body.userid;
+    const sessionUserID = req.header('sessionUserID');
+    const userid = sessionUserID;
     const postid = req.body.postid;
 
     if (!userid) {

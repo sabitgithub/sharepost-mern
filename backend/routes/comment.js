@@ -12,8 +12,6 @@ router.route('/').get((req, res) => {
 
 router.route('/user-comment').post(async (req, res) => {
     const postid = req.body.postid;
-    const sessionUserID = req.body.userid;
-    console.log(sessionUserID);
     try {
         const comments = await Comment.find({postid});
 
@@ -40,9 +38,11 @@ router.route('/user-comment').post(async (req, res) => {
 
 
 router.route('/add').post(async (req, res) => {
+    const sessionUserID = req.header('sessionUserID');
+
     const content = req.body.content;
     const postid = req.body.postid;
-    const userid = req.body.userid;
+    const userid = sessionUserID;
 
     if (!content || content.length === 0) {
         return res.status(404).json({error: 'No comments found'});

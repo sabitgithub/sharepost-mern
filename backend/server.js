@@ -7,11 +7,9 @@ const crypto = require("crypto");
 const sessions = require("express-session");
 const Session = require('./models/session.model');
 const cookieParser = require("cookie-parser");
-const Cookies = require('js-cookie');
 
 require('dotenv').config();
 process.env.TZ = 'Asia/Dhaka';
-
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -35,10 +33,6 @@ mongoose.connect(uri, {
     useUnifiedTopology: true,
 });
 
-app.listen(port, () => {
-    console.log(`Server is running on port: ${port}`);
-});
-
 const connection = mongoose.connection;
 connection.once('open', () => {
     console.log('MongoDB database connection established successfully');
@@ -50,51 +44,42 @@ connection.once('open', () => {
 
 app.use(cookieParser());
 
-const secretKey = crypto.randomBytes(32).toString('hex');
 app.use(sessions({
-    secret: secretKey,
+    secret: 'Sabit@123#$', // Replace with a strong secret key
     saveUninitialized: true,
     cookie: {maxAge: 600000, sameSite: 'strict'},
     resave: false
 }));
 
 const isAuthenticated = async (req, res, next) => {
-
-    console.log(Cookies.get("sessionID"));
-
     try {
-        const sessionID = 'dUzaRJ99XwXqo_qrE5a-9Ow5uo8IxC9U';
+        const sessionID = req.header('sessionID');
+        const sessionUserID = req.header('sessionUserID');
+
+        console.log('Get from header sessionID:', sessionID);
+        console.log('Get from header sessionUserID:', sessionUserID);
+
         if (!sessionID) {
             return res.status(401).json({error: 'Authentication required[1]. SessionID: ' + sessionID});
         }
 
-        console.log('Get from sessionStorage ' + sessionID);
+        const userCheckSession = await Session.findOne({sessionId: sessionID});
+        console.log('User check: '+sessionID);
+        if (userCheckSession) {
+            const expirationDate = new Date(userCheckSession.expiresAt);
+            const currentTime = new Date();
 
-        const session = await Session.findOne({sessionId: sessionID});
-        if (session) {
-            const userCheckSession = await Session.findOne({sessionId: sessionID});
-            if (userCheckSession) {
-                const expirationDate = new Date(userCheckSession.expiresAt);
-                const currentTime = new Date();
-
-                console.log('current date: ' + currentTime);
-                console.log('exp date: ' + expirationDate);
-                if (currentTime < expirationDate) {
-                    next();
-                } else {
-                    await Session.deleteOne({sessionId: sessionID});
-                    res.status(401).json({error: 'Authentication required[2]'});
-                }
+            if (currentTime < expirationDate) {
+                next();
+            } else {
+                await Session.deleteOne({sessionId: sessionID});
+                res.status(401).json({error: 'Authentication required[2]'});
             }
-
-        } else {
-            res.status(401).json({error: 'Authentication required[3]'});
         }
     } catch (err) {
         res.status(500).json({error: 'Internal server error'});
     }
 };
-
 
 /*
 * Routing
@@ -107,13 +92,15 @@ const userLike = require('./routes/like');
 const userComment = require('./routes/comment');
 const userProfile = require('./routes/userProfile');
 
-
-app.use('/users', usersRouter); //This is registration user no authentication required
-app.use('/auth', userAuth); //This is login user no authentication required
-
+app.use('/users', usersRouter); // This is registration user no authentication required
+app.use('/auth', userAuth); // This is login user no authentication required
 
 // Routes that require authentication (use the isAuthenticated middleware)
 app.use('/profile', isAuthenticated, userProfile);
 app.use('/post', isAuthenticated, userPost);
 app.use('/like', isAuthenticated, userLike);
 app.use('/comment', isAuthenticated, userComment);
+
+app.listen(port, () => {
+    console.log(`Server is running on port: ${port}`);
+});

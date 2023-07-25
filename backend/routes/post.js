@@ -12,20 +12,21 @@ const storage = multer.diskStorage({
     },
 });
 
-const upload = multer({ storage });
+const upload = multer({storage});
 
 router.route('/').get((req, res) => {
     Post.find()
-        .sort({ createdAt: -1 })
+        .sort({createdAt: -1})
         .then(posts => res.json(posts))
         .catch(err => res.status(400).json('Error: ' + err));
 });
 
 router.route('/add').post(upload.single('image'), async (req, res) => {
+    const sessionUserID = req.header('sessionUserID');
     const title = req.body.title;
     const content = req.body.content;
     const image = req.file ? req.file.filename : '';
-    const userid = req.body.userid;
+    const userid = sessionUserID;
 
     try {
         const newPost = new Post({

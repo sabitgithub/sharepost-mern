@@ -55,7 +55,12 @@ export default class CreateNewPost extends Component {
 
         console.log(formData);
 
-        axios.post(`${backendUrl}/post/add`, formData)
+        axios.post(`${backendUrl}/post/add`, formData, {
+            headers: {
+                'sessionID': sessionStorage.getItem('sessionID'),
+                'sessionUserID': sessionStorage.getItem('sessionUserID'),
+            },
+        })
             .then((response) => {
                 if (response.status === 200) {
                     this.setState({

@@ -42,7 +42,12 @@ const Post = props => {
 
 
     useEffect(() => {
-        axios.post(`${backendUrl}/comment/user-comment/`, {postid: props.post._id})
+        axios.post(`${backendUrl}/comment/user-comment/`, {postid: props.post._id}, {
+            headers: {
+                'sessionID': sessionStorage.getItem('sessionID'),
+                'sessionUserID': sessionStorage.getItem('sessionUserID'),
+            },
+        })
             .then((response) => {
                 setUserComments(response.data);
                 console.log(response.data);
@@ -52,7 +57,12 @@ const Post = props => {
             });
 
         axios
-            .post(`${backendUrl}/like/user-like`, {postid: props.post._id, userid: Cookies.get('sessionUserID')})
+            .post(`${backendUrl}/like/user-like`, {postid: props.post._id}, {
+                headers: {
+                    'sessionID': sessionStorage.getItem('sessionID'),
+                    'sessionUserID': sessionStorage.getItem('sessionUserID'),
+                },
+            })
             .then((response) => {
                 if (response.status === 200 && response.data.message === 'Liked') {
                     setIsLiked(true);
@@ -64,7 +74,12 @@ const Post = props => {
                 console.error(error);
             });
         axios
-            .post(`${backendUrl}/comment/count`, {postid: props.post._id})
+            .post(`${backendUrl}/comment/count`, {postid: props.post._id}, {
+                headers: {
+                    'sessionID': sessionStorage.getItem('sessionID'),
+                    'sessionUserID': sessionStorage.getItem('sessionUserID'),
+                },
+            })
             .then((response) => {
                 console.log('Count:' + response.data);
                 if (response.status === 200) {
@@ -83,6 +98,11 @@ const Post = props => {
             postid: props.post._id,
             content: commentInput,
             userid: Cookies.get('sessionUserID')
+        }, {
+            headers: {
+                'sessionID': sessionStorage.getItem('sessionID'),
+                'sessionUserID': sessionStorage.getItem('sessionUserID'),
+            },
         })
             .then((response) => {
                 if (response.status === 200) {
@@ -102,7 +122,12 @@ const Post = props => {
 
 
     const handleLike = () => {
-        axios.post(`${backendUrl}/like/add`, {postid: props.post._id, userid: Cookies.get('sessionUserID')})
+        axios.post(`${backendUrl}/like/add`, {postid: props.post._id}, {
+            headers: {
+                'sessionID': sessionStorage.getItem('sessionID'),
+                'sessionUserID': sessionStorage.getItem('sessionUserID'),
+            },
+        })
             .then((response) => {
                 if (response.status === 200 && response.data.message == 'Liked') {
                     setIsLiked(true);
@@ -186,8 +211,16 @@ export default class PostList extends Component {
     }
 
     componentDidMount() {
+        const sessionID = sessionStorage.getItem('sessionID');
+        const sessionUserID = sessionStorage.getItem('sessionUserID');
+
         axios
-            .get(`${backendUrl}/post/`)
+            .get(`${backendUrl}/post/`, {
+                headers: {
+                    'sessionID': sessionID,
+                    'sessionUserID': sessionUserID,
+                },
+            })
             .then(response => {
                 this.setState({posts: response.data});
             })
@@ -209,12 +242,12 @@ export default class PostList extends Component {
     render() {
         return (
             <>
-            <Navbar />
-            <div style={{maxWidth: '800px', margin: '0 auto', padding: '16px'}}>
-                <div>
-                    {this.postList()}
+                <Navbar/>
+                <div style={{maxWidth: '800px', margin: '0 auto', padding: '16px'}}>
+                    <div>
+                        {this.postList()}
+                    </div>
                 </div>
-            </div>
             </>
         );
     }

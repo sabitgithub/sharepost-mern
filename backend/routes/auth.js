@@ -38,8 +38,6 @@ router.post('/login', async (req, res) => {
         const expireTime = new Date();
         expireTime.setMinutes(expireTime.getMinutes() + 10);
 
-        console.log('inserted exp time: ' + expireTime);
-
         const newSession = new SessionModel({userId: user._id, sessionId: req.sessionID, expiresAt: expireTime});
         await newSession.save();
 
@@ -56,10 +54,10 @@ router.post('/login', async (req, res) => {
 });
 
 router.post('/logout', async (req, res) => {
-    console.log(req.sessionID);
     try {
-        console.log('session:' + req.sessionID);
-        await SessionModel.deleteOne({sessionId: req.sessionID});
+        const sessionID = req.header('sessionID');
+
+        await SessionModel.deleteOne({sessionId: sessionID});
         res.json({message: 'Logout successful'});
     } catch (err) {
         res.status(500).json({error: 'Internal server error' + err});
