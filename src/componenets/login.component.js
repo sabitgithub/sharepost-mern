@@ -106,7 +106,9 @@ export default class LoginUser extends Component {
                 console.log(res.data);
                 this.setSuccessWithTimeout('Login successfully');
                 const sessionID = res.data.sessionID;
+                const sessionUserID = res.data.sessionUserID;
                 Cookies.set('sessionID', sessionID, { expires: 10 / (60 * 24) });
+                Cookies.set('sessionUserID', sessionUserID, { expires: 10 / (60 * 24) });
                 window.location = '/';
             })
             .catch((error) => {

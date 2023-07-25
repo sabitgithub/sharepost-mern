@@ -1,12 +1,45 @@
 const router = require('express').Router();
 const Comment = require('../models/comment.model');
 const Like = require('../models/like.model');
+const User = require('../models/user.model');
+const LikeModel = require("../models/like.model");
 
 router.route('/').get((req, res) => {
     Comment.find()
         .then(posts => res.json(posts))
         .catch(err => res.status(400).json('Error: ' + err));
 });
+
+router.route('/user-comment').post(async (req, res) => {
+    const postid = req.body.postid;
+    try {
+        const comments = await Comment.find({postid});
+
+        if (!comments || comments.length === 0) {
+            return res.status(404).json({error: 'No comments found for the post'});
+        }
+
+        const userComments = [];
+        for (const comment of comments) {
+            const user = await User.findOne({_id: comment.userid});
+            const userComment = {
+                _id: comment._id,
+                content: comment.content,
+                postid: comment.postid,
+                userid: comment.userid,
+                name: user ? user.name : 'Unknown User',
+                createdAt: comment.createdAt,
+            };
+            userComments.push(userComment);
+        }
+
+        return res.status(200).json(userComments);
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({error: 'Internal server error'});
+    }
+});
+
 
 router.route('/add').post(async (req, res) => {
     const content = req.body.content;
@@ -33,9 +66,9 @@ router.route('/count/:id').get(async (req, res) => {
     const postid = req.params.id;
 
     try {
-        const CommentCount = await Comment.countDocuments({ postid });
-        const LikeCount = await Like.countDocuments({ postid });
-        res.json({ CommentCount: CommentCount,LikeCount: LikeCount });
+        const CommentCount = await Comment.countDocuments({postid});
+        const LikeCount = await Like.countDocuments({postid});
+        res.json({CommentCount: CommentCount, LikeCount: LikeCount});
     } catch (err) {
         res.status(400).json('Error: ' + err + err.code);
     }

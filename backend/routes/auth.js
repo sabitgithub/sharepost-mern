@@ -2,7 +2,8 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const router = express.Router();
 const User = require('../models/user.model');
-const Session = require('../models/session.model');
+const SessionModel = require('../models/session.model');
+const session = require("express-session");
 
 
 router.post('/login', async (req, res) => {
@@ -20,7 +21,7 @@ router.post('/login', async (req, res) => {
             return res.status(401).json({error: 'Invalid password'});
         }
 
-        const userCheckSession = await Session.findOne({sessionId: req.sessionID});
+        const userCheckSession = await SessionModel.findOne({sessionId: req.sessionID});
         if (userCheckSession) {
             const expirationDate = new Date(userCheckSession.expiresAt);
             const currentTime = new Date();
@@ -30,7 +31,7 @@ router.post('/login', async (req, res) => {
             if (currentTime < expirationDate) {
                 return res.status(200).json({message: 'Already logged in'});
             } else {
-                await Session.deleteOne({sessionId: req.sessionID});
+                await SessionModel.deleteOne({sessionId: req.sessionID});
             }
         }
 
@@ -39,13 +40,15 @@ router.post('/login', async (req, res) => {
 
         console.log('inserted exp time: ' + expireTime);
 
-        const newSession = new Session({userId: user._id, sessionId: req.sessionID, expiresAt: expireTime});
+        const newSession = new SessionModel({userId: user._id, sessionId: req.sessionID, expiresAt: expireTime});
         await newSession.save();
 
-        console.log('session from login:' + req.sessionID);
+
+        console.log('session userid from login:' + session.sessionUserID);
         res.json({
             message: 'Login successful',
             sessionID: req.sessionID,
+            sessionUserID: user._id,
         });
     } catch (err) {
         res.status(500).json({error: 'An error occurred while processing your request'});
@@ -56,7 +59,7 @@ router.post('/logout', async (req, res) => {
     console.log(req.sessionID);
     try {
         console.log('session:' + req.sessionID);
-        await Session.deleteOne({sessionId: req.sessionID});
+        await SessionModel.deleteOne({sessionId: req.sessionID});
         res.json({message: 'Logout successful'});
     } catch (err) {
         res.status(500).json({error: 'Internal server error' + err});

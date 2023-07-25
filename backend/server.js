@@ -60,7 +60,7 @@ const isAuthenticated = async (req, res, next) => {
     console.log(Cookies.get("sessionID"));
 
     try {
-        const sessionID = 'MeinZ_MY0tivymMtwv6NzIBTZ0d2GWgb';
+        const sessionID = 'dUzaRJ99XwXqo_qrE5a-9Ow5uo8IxC9U';
         if (!sessionID) {
             return res.status(401).json({error: 'Authentication required[1]. SessionID: ' + sessionID});
         }
