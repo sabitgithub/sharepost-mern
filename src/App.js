@@ -7,6 +7,7 @@ import Login from "./componenets/login.component";
 import Navbar from "./componenets/navbar.component";
 import Post from "./componenets/post-list.component";
 import Logout from "./componenets/logout.component";
+import CreatePost from "./componenets/create-post.component";
 
 function App() {
     return (
@@ -18,6 +19,7 @@ function App() {
                 <Route path="/registration" element={<Registration/>}/>
                 <Route path="/login" element={<Login/>}/>
                 <Route path="/logout" element={<Logout/>}/>
+                <Route path="/CreatePost" element={<CreatePost/>}/>
             </Routes>
         </Router>
 

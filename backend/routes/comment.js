@@ -12,12 +12,10 @@ router.route('/').get((req, res) => {
 
 router.route('/user-comment').post(async (req, res) => {
     const postid = req.body.postid;
+    const sessionUserID = req.body.userid;
+    console.log(sessionUserID);
     try {
         const comments = await Comment.find({postid});
-
-        if (!comments || comments.length === 0) {
-            return res.status(404).json({error: 'No comments found for the post'});
-        }
 
         const userComments = [];
         for (const comment of comments) {
@@ -46,6 +44,10 @@ router.route('/add').post(async (req, res) => {
     const postid = req.body.postid;
     const userid = req.body.userid;
 
+    if (!content || content.length === 0) {
+        return res.status(404).json({error: 'No comments found'});
+    }
+
     try {
         const newComment = new Comment({
             content,
@@ -62,8 +64,8 @@ router.route('/add').post(async (req, res) => {
 
 
 // Count total comments & likes for a post using the post ID
-router.route('/count/:id').get(async (req, res) => {
-    const postid = req.params.id;
+router.route('/count').post(async (req, res) => {
+    const postid = req.body.postid;
 
     try {
         const CommentCount = await Comment.countDocuments({postid});

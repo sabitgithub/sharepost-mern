@@ -1,215 +1,93 @@
 import React, {Component} from 'react';
-import {Link} from 'react-router-dom';
 import axios from "axios";
-
-import {
-    MDBBtn,
-    MDBContainer,
-    MDBRow,
-    MDBCol,
-    MDBCard,
-    MDBCardBody,
-    MDBCardImage,
-    MDBInput,
-    MDBIcon,
-}
-    from 'mdb-react-ui-kit';
-
+import {MDBContainer, MDBCard, MDBCardBody, MDBInput} from 'mdb-react-ui-kit';
+import Cookies from "js-cookie";
 
 const backendUrl = 'http://localhost:5000';
 
-export default class CreatePost extends Component {
-
+export default class CreateNewPost extends Component {
     constructor(props) {
         super(props);
 
-        this.onchangeTitle = this.onchangeTitle.bind(this)
-        this.onchangeContent = this.onchangeContent.bind(this)
-        this.onchangeImage = this.onchangeImage.bind(this)
-        this.onSubmit = this.onSubmit.bind(this)
-
-
         this.state = {
-            onchangeTitle: '',
-            onchangeContent: '',
-            onchangeImage: '',
-            errorTimeout: null,
-            success: '',
-            successTimeout: null,
-            error: [],
-        }
+            title: "", // New field for the post title
+            newPost: "",
+            showSuccessAlert: false,
+        };
     }
 
-    setErrorWithTimeout = (messages) => {
-        // Clear any existing error timeout
-        if (this.state.errorTimeout) {
-            clearTimeout(this.state.errorTimeout);
-        }
-
-        // Set the error messages as an array
-        let errorArray = [];
-        if (Array.isArray(messages)) {
-            errorArray = messages;
-        } else {
-            errorArray.push(messages);
-        }
-
+    // Handle the change of the title input
+    onChangeTitle = (event) => {
         this.setState({
-            error: errorArray,
-            errorTimeout: setTimeout(() => {
-                this.setState({error: [], errorTimeout: null});
-            }, 5000),
+            title: event.target.value,
         });
     };
 
-    setSuccessWithTimeout = (message) => {
-        // Clear any existing success timeout
-        if (this.state.successTimeout) {
-            clearTimeout(this.state.successTimeout);
-        }
-
-        // Set the success message
+    // Handle the change of the new post input
+    onChangeNewPost = (event) => {
         this.setState({
-            success: message,
-            successTimeout: setTimeout(() => {
-                this.setState({success: '', successTimeout: null});
-            }, 5000),
+            newPost: event.target.value,
         });
     };
 
-
-    onchangeName(e) {
-        this.setState({
-            name: e.target.value
+    // Handle the submission of the new post
+    handleNewPostSubmit = () => {
+        const {title, newPost} = this.state;
+        axios.post(`${backendUrl}/post/add`, {
+            title: title, // Pass the title to the backend
+            content: newPost,
+            userid: Cookies.get('sessionUserID'),
         })
-    }
-
-    onchangeEmail(e) {
-        this.setState({
-            email: e.target.value
-        })
-    }
-
-    onchangePassword(e) {
-        this.setState({
-            password: e.target.value
-        })
-    }
-
-    onchangeReTypepassword(e) {
-        this.setState({
-            reTypepassword: e.target.value
-        })
-    }
-
-    onSubmit(e) {
-        e.preventDefault();
-
-        const registration = {
-            name: this.state.name,
-            email: this.state.email,
-            password: this.state.password,
-            reTypepassword: this.state.reTypepassword,
-        }
-        console.log(registration);
-
-        axios
-            .post(`${backendUrl}/users/add`, registration)
-            .then((res) => {
-                console.log(res.data);
-                this.setSuccessWithTimeout('User added successfully');
-                window.location = '/';
+            .then((response) => {
+                if (response.status === 200) {
+                    // Clear the input fields after successful submission
+                    this.setState({
+                        title: "",
+                        newPost: "",
+                        showSuccessAlert: true,
+                    });
+                    setTimeout(() => {
+                        this.setState({showSuccessAlert: false});
+                    }, 3000);
+                }
             })
             .catch((error) => {
                 console.error(error);
-                // Set the error message in the state
-                this.setErrorWithTimeout(error.response.data.error);
             });
-
-
-    }
-
+    };
 
     render() {
+        const {title, newPost, showSuccessAlert} = this.state;
         return (
             <MDBContainer fluid>
-
-                <MDBCard className='text-black m-5' style={{borderRadius: '25px'}}>
+                <MDBCard className='text-black mb-3' alignment='center'
+                         style={{maxWidth: '800px', maxHeight: '1200px', margin: '0 auto', padding: '16px'}}>
                     <MDBCardBody>
-                        <MDBRow>
-                            <MDBCol md='10' lg='6' className='order-2 order-lg-1 d-flex flex-column align-items-center'>
-
-                                <form onSubmit={this.onSubmit}>
-
-                                    <p className="text-center h1 fw-bold mb-5 mx-1 mx-md-4 mt-4">Sign up</p>
-
-                                    <div className="d-flex flex-row align-items-center mb-4 ">
-                                        <MDBIcon fas icon="user me-3" size='lg'/>
-                                        <MDBInput label='Your Name' id='name' value={this.state.name}
-                                                  onChange={this.onchangeName} type='text' className='w-100'/>
-                                    </div>
-
-                                    <div className="d-flex flex-row align-items-center mb-4">
-                                        <MDBIcon fas icon="envelope me-3" size='lg'/>
-                                        <MDBInput label='Your Email' id='email' value={this.state.email}
-                                                  onChange={this.onchangeEmail} type='email'/>
-                                    </div>
-
-                                    <div className="d-flex flex-row align-items-center mb-4">
-                                        <MDBIcon fas icon="lock me-3" size='lg'/>
-                                        <MDBInput label='Password' id='password' value={this.state.password}
-                                                  onChange={this.onchangePassword} type='password'/>
-                                    </div>
-
-                                    <div className="d-flex flex-row align-items-center mb-4">
-                                        <MDBIcon fas icon="key me-3" size='lg'/>
-                                        <MDBInput label='Repeat your password' id='reTypepassword'
-                                                  value={this.state.reTypepassword}
-                                                  onChange={this.onchangeReTypepassword} type='password'/>
-                                    </div>
-
-                                    {/* Display the error message if there is one */}
-                                    {this.state.error && this.state.error.length > 0 && (
-                                        <div className='alert alert-danger' role='alert'>
-                                            {this.state.error.map((message, index) => (
-                                                <div key={index}>{message}</div>
-                                            ))}
-                                        </div>
-                                    )}
-
-                                    <div className="d-flex flex-row align-items-center mb-4">
-                                        <input type="submit" style={{marginLeft: '18px'}} value="Register"
-                                               className="btn btn-primary"/>
-                                        <a href="/login" style={{marginLeft: '18px'}}
-                                           className="btn btn-secondary">Login</a>
-                                    </div>
-                                    <p style={{marginLeft: '18px', color: 'blue', cursor: 'pointer'}}> Already Have an
-                                        Account? Click <a href="/login"
-                                                          style={{color: 'blue', textDecoration: 'underline'}}>Login</a>
-                                    </p>
-
-
-                                    {this.state.success && (
-                                        <div className='alert alert-success' role='alert'>
-                                            {this.state.success}
-                                        </div>
-                                    )}
-
-                                </form>
-                            </MDBCol>
-
-                            <MDBCol md='10' lg='6' className='order-1 order-lg-2 d-flex align-items-center'>
-                                <MDBCardImage
-                                    src='https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-registration/draw1.webp'
-                                    fluid/>
-                            </MDBCol>
-
-                        </MDBRow>
+                        <MDBInput
+                            type='text'
+                            value={title}
+                            placeholder='Title'
+                            onChange={this.onChangeTitle}
+                        />
+                        <textarea
+                            className='form-control mt-3'
+                            rows='3'
+                            placeholder='Write your thoughts...'
+                            value={newPost}
+                            onChange={this.onChangeNewPost}
+                            style={{height: '236px'}}
+                        ></textarea>
+                        <button className='btn btn-primary mt-3' onClick={this.handleNewPostSubmit}>
+                            Submit Post
+                        </button>
+                        {showSuccessAlert && (
+                            <div className="alert alert-success mt-3" role="alert">
+                                Post submitted successfully!
+                            </div>
+                        )}
                     </MDBCardBody>
                 </MDBCard>
-
             </MDBContainer>
         );
     }
-
 }

@@ -47,7 +47,29 @@ router.route('/add').post(async (req, res) => {
             res.status(400).json('Error: ' + err + err.code);
         }
     }
-)
-;
+);
+
+router.route('/user-like').post(async (req, res) => {
+    const userid = req.body.userid;
+    const postid = req.body.postid;
+
+    if (!userid) {
+        return res.status(404).json({error: 'User not found'});
+    }
+    if (!postid) {
+        return res.status(404).json({error: 'Post not found'});
+    }
+
+    try {
+        const userLike = await Like.findOne({userid: userid, postid: postid});
+        if (userLike) {
+            return res.status(200).json({message: 'Liked'});
+        } else {
+            return res.status(200).json({message: 'NotLiked'});
+        }
+    } catch (err) {
+        console.log(err);
+    }
+});
 
 module.exports = router;

@@ -26,8 +26,12 @@ const calculateTimeDifference = (createdAt) => {
 
 const Post = props => {
 
-    const [isLiked, setIsLiked] = useState(false);
+    console.log('full data:' + props.post);
+
+    const [isLiked, setIsLiked] = useState(props.post.isLiked || false);
     const [commentInput, setCommentInput] = useState("");
+    const [totalLike, settotalLike] = useState("0");
+    const [totalComment, settotalComment] = useState("0");
     const [showSuccessAlert, setShowSuccessAlert] = useState(false);
     const [userComments, setUserComments] = useState([]);
 
@@ -37,7 +41,7 @@ const Post = props => {
 
 
     useEffect(() => {
-        axios.post(`${backendUrl}/comment/user-comment/`, { postid: props.post._id })
+        axios.post(`${backendUrl}/comment/user-comment/`, {postid: props.post._id})
             .then((response) => {
                 setUserComments(response.data);
                 console.log(response.data);
@@ -45,6 +49,32 @@ const Post = props => {
             .catch((error) => {
                 console.error(error);
             });
+
+        axios
+            .post(`${backendUrl}/like/user-like`, {postid: props.post._id, userid: Cookies.get('sessionUserID')})
+            .then((response) => {
+                if (response.status === 200 && response.data.message === 'Liked') {
+                    setIsLiked(true);
+                } else {
+                    setIsLiked(false);
+                }
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+        axios
+            .post(`${backendUrl}/comment/count`, {postid: props.post._id})
+            .then((response) => {
+                console.log('Count:' + response.data);
+                if (response.status === 200) {
+                    settotalLike(response.data.LikeCount);
+                    settotalComment(response.data.CommentCount);
+                }
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+
     }, [props.post._id]);
 
     const handleCommentSubmit = () => {
@@ -60,12 +90,15 @@ const Post = props => {
                     setTimeout(() => {
                         setShowSuccessAlert(false);
                     }, 3000);
+
+                    window.location.reload();
                 }
             })
             .catch((error) => {
                 console.error(error);
             });
     };
+
 
     const handleLike = () => {
         axios.post(`${backendUrl}/like/add`, {postid: props.post._id, userid: Cookies.get('sessionUserID')})
@@ -76,6 +109,7 @@ const Post = props => {
                 if (response.status === 200 && response.data.message == 'UnLiked') {
                     setIsLiked(false);
                 }
+                window.location.reload();
             })
             .catch((error) => {
                 console.error(error);
@@ -101,6 +135,12 @@ const Post = props => {
                     </button>
                 </div>
 
+                <div className='d-flex justify-content-between' style={{'marginTop': '10px'}}>
+                    <MDBCardText>Likes: {totalLike}</MDBCardText>
+                    <MDBCardText className='text-muted'
+                                 style={{'textAlign': 'right'}}>Comments: {totalComment}</MDBCardText>
+                </div>
+
                 <div className='form-group d-flex flex-column align-items-end'>
                     <textarea className='form-control mt-3' rows='3' placeholder='Write a comment...'
                               value={commentInput} onChange={handleCommentChange}></textarea>
@@ -116,12 +156,12 @@ const Post = props => {
                 <MDBCard key={comment._id}>
                     <MDBCardBody>
                         <div className='d-flex justify-content-between'>
-                        <div>
-                            <strong>{comment.name}:</strong> {comment.content}
-                        </div>
-                        <MDBCardText className="text-muted">
-                            {calculateTimeDifference(comment.createdAt)}
-                        </MDBCardText>
+                            <div>
+                                <strong>{comment.name}:</strong> {comment.content}
+                            </div>
+                            <MDBCardText className="text-muted">
+                                {calculateTimeDifference(comment.createdAt)}
+                            </MDBCardText>
                         </div>
                     </MDBCardBody>
                 </MDBCard>

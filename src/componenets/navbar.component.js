@@ -30,6 +30,10 @@ export default class Navbar extends Component {
                             <Link to="/" className="nav-link">
                                 NewsFeed
                             </Link>
+                        </li><li className="navbar-item">
+                            <Link to="CreatePost" className="nav-link">
+                                New Post
+                            </Link>
                         </li>
                         <li className="navbar-item">
                             <Link to="/profile" className="nav-link">

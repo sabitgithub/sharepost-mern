@@ -3,6 +3,7 @@ const Post = require('../models/post.model');
 
 router.route('/').get((req, res) => {
     Post.find()
+        .sort({ createdAt: -1 })
         .then(posts => res.json(posts))
         .catch(err => res.status(400).json('Error: ' + err));
 });
