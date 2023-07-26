@@ -116,7 +116,7 @@ const Post = props => {
                 }
             })
             .catch((error) => {
-                window.location = '/login?error='+error.response.data.error;
+                window.location = '/login?error=' + error.response.data.error;
             });
     };
 
@@ -138,7 +138,7 @@ const Post = props => {
                 window.location.reload();
             })
             .catch((error) => {
-                window.location = '/login?error='+error.response.data.error;
+                window.location = '/login?error=' + error.response.data.error;
             });
     };
 
@@ -225,8 +225,18 @@ export default class PostList extends Component {
                 this.setState({posts: response.data});
             })
             .catch(error => {
-                console.log('Server Response: ' + error.response.data.error);
-                window.location = '/login?error='+error.response.data.error;
+                if (error.response) {
+                    console.log('Error status:', error.response.status);
+                    console.log('Error data:', error.response.data);
+                    if (error.response.status === 401) {
+                        window.location = '/login?error=Unauthorized';
+                    } else {
+                        window.location = '/login?error=An error occurred while fetching posts.';
+                    }
+                } else {
+                    console.log('Error:', error.message);
+                    window.location = '/login?error=Connection refused. Please try again later.';
+                }
             });
     }
 

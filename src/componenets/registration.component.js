@@ -104,7 +104,7 @@ export default class RegistrationUser extends Component {
         })
     }
 
-    onSubmit(e) {
+    async onSubmit(e) {
         e.preventDefault();
 
         const registration = {
@@ -112,24 +112,24 @@ export default class RegistrationUser extends Component {
             email: this.state.email,
             password: this.state.password,
             reTypepassword: this.state.reTypepassword,
-        }
-        console.log(registration);
+        };
 
-        axios
-            .post(`${backendUrl}/users/add`, registration)
-            .then((res) => {
-                console.log(res.data);
-                this.setSuccessWithTimeout('User added successfully');
-                window.location = '/';
-            })
-            .catch((error) => {
+        try {
+            console.log(registration);
+            const response = await axios.post(`${backendUrl}/users/add`, registration);
+            console.log(response.data);
+            this.setSuccessWithTimeout('User added successfully');
+            window.location = '/';
+        } catch (error) {
+            if (error.response) {
                 console.error(error);
-                // Set the error message in the state
                 this.setErrorWithTimeout(error.response.data.error);
-            });
-
-
+            } else {
+                this.setErrorWithTimeout('Connection refused. Please try again later.');
+            }
+        }
     }
+
 
 
     render() {

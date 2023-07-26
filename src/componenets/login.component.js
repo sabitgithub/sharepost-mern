@@ -101,7 +101,7 @@ export default class LoginUser extends Component {
         console.log(login);
 
         axios
-            .post(`${backendUrl}/auth/login`, login,{ withCredentials: true })
+            .post(`${backendUrl}/auth/login`, login, {withCredentials: true})
             .then((res) => {
                 console.log(res.data);
                 this.setSuccessWithTimeout('Login successfully');
@@ -115,12 +115,21 @@ export default class LoginUser extends Component {
                 console.error(error);
                 const errorMessage = error.response && error.response.data && error.response.data.error
                     ? error.response.data.error
-                    : 'An error occurred while processing your request';
+                    : 'Connection refused. Please try again later.';
 
                 this.setErrorWithTimeout(errorMessage);
             });
 
 
+    }
+
+    componentDidMount() {
+        const params = new URLSearchParams(window.location.search);
+        const errorParam = params.get('error');
+
+        if (errorParam) {
+            this.setState({error: [errorParam]});
+        }
     }
 
 
