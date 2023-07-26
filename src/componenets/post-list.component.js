@@ -35,6 +35,7 @@ const Post = props => {
     const [totalComment, settotalComment] = useState("0");
     const [showSuccessAlert, setShowSuccessAlert] = useState(false);
     const [userComments, setUserComments] = useState([]);
+    const [postUserFullName, setpostUserFullName] = useState("");
 
     const handleCommentChange = (event) => {
         setCommentInput(event.target.value);
@@ -73,6 +74,26 @@ const Post = props => {
             .catch((error) => {
                 console.error(error);
             });
+
+        axios
+            .post(`${backendUrl}/post/user-name`, {postid: props.post._id}, {
+                headers: {
+                    'sessionID': sessionStorage.getItem('sessionID'),
+                    'sessionUserID': sessionStorage.getItem('sessionUserID'),
+                },
+            })
+            .then((response) => {
+                if (response.status === 200) {
+                    setpostUserFullName(response.data.postUserFullName);
+                    console.log('postUserFullName: ' + response.data.postUserFullName)
+                } else {
+                    setIsLiked('');
+                }
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+
         axios
             .post(`${backendUrl}/comment/count`, {postid: props.post._id}, {
                 headers: {
@@ -144,6 +165,11 @@ const Post = props => {
 
     return (
         <MDBCard className='text-black mb-3' alignment='center' style={{'marginTop': '40px'}}>
+            <div className='d-flex justify-content-between'>
+            <MDBCardTitle style={{'textAlign': 'left'}}>Posted By: {postUserFullName} </MDBCardTitle>
+            <MDBCardText className='text-muted'
+                         style={{'textAlign': 'right'}}>{calculateTimeDifference(props.post.createdAt)}</MDBCardText>
+            </div>
             {props.post.image &&
                 <MDBCardImage src={backendUrl + '/uploads/' + props.post.image} alt={props.post.title} style={{
                     'width': '800px',
@@ -157,8 +183,6 @@ const Post = props => {
                 <MDBCardTitle>{props.post.title}</MDBCardTitle>
                 <div className='d-flex justify-content-between'>
                     <MDBCardText>{props.post.content}</MDBCardText>
-                    <MDBCardText className='text-muted'
-                                 style={{'textAlign': 'right'}}>{calculateTimeDifference(props.post.createdAt)}</MDBCardText>
                 </div>
 
                 <div className='form-group d-flex flex-column align-items-start' style={{'marginTop': '60px'}}>

@@ -2,6 +2,8 @@ const router = require('express').Router();
 const Post = require('../models/post.model');
 const multer = require('multer');
 const path = require('path');
+const SessionModel = require("../models/session.model");
+const User = require("../models/user.model");
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -50,5 +52,22 @@ router.route('/add').post(upload.single('image'), async (req, res) => {
         res.status(400).json('Error: ' + err + err.code);
     }
 });
+
+router.route('/user-name').post(async (req, res) => {
+    const postid = req.body.postid;
+
+    try {
+        const userIdPost = await Post.findOne({_id: postid});
+        if (userIdPost) {
+            const userFullName = await User.findOne({_id: userIdPost.userid});
+            if (userFullName) {
+                return res.status(200).json({postUserFullName: userFullName.name});
+            }
+        }
+    } catch (err) {
+        console.log(err);
+    }
+});
+
 
 module.exports = router;
